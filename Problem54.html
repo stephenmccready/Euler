@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Problem 54</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+table {border-collapse: collapse;}
+th,td {border:1px solid powderblue;padding:5px;}
+</style>
+<body>
+<div id="wins"></div>
+<table><tbody id="results"></tbody></table>
+</body>
+<script>
+var cardRank=['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+var allText="";
+function readTextFile(file)
+{
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                allText = rawFile.responseText;                
+            }
+        }
+    }
+    rawFile.send(null);
+}
+
+readTextFile('poker.txt');
+
+var handArray = allText.split('\n');
+
+var wins = 0;
+for (x = 0; x < handArray.length-1; x++){
+	var player1=handArray[x].substring(0,14);
+	var player2=handArray[x].substring(15,29);
+
+	var result = calculateResult(player1, player2);
+	
+	wins += result;
+	
+	document.getElementById("results").innerHTML 
+		+= '<tr><td>' + x
+		+ '</td><td>' + handArray[x].substring(0,14)
+		+ '</td><td>' + handArray[x].substring(15,29)
+		+ '</td><td>' + result.toString() + '</td></tr>';
+}
+
+document.getElementById("wins").innerHTML = wins;
+
+
+function calculateResult(player1hand, player2hand){
+	var strHand1=player1.split(" ");
+	var strHand2=player2.split(" ");
+	var hand1=[cardRank.indexOf(strHand1[0].substring(0,1)),
+			cardRank.indexOf(strHand1[1].substring(0,1)),
+			cardRank.indexOf(strHand1[2].substring(0,1)),
+			cardRank.indexOf(strHand1[3].substring(0,1)),
+			cardRank.indexOf(strHand1[4].substring(0,1))]
+	var hand2=[cardRank.indexOf(strHand2[0].substring(0,1)),
+			cardRank.indexOf(strHand2[1].substring(0,1)),
+			cardRank.indexOf(strHand2[2].substring(0,1)),
+			cardRank.indexOf(strHand2[3].substring(0,1)),
+			cardRank.indexOf(strHand2[4].substring(0,1))]
+
+	hand1.sort(function(a, b){return b-a});
+	hand2.sort(function(a, b){return b-a});
+
+// Determine each hand's rank
+	var highCard1 = hand1[0];
+	var highCard2 = hand2[0];
+
+	var isPair1 = isPair(hand1);
+	var isPair2 = isPair(hand2);
+
+	var is2Pair1 = is2Pair(hand1);
+	var is2Pair2 = is2Pair(hand2);
+
+	var is3ofAKind1 = is3ofAKind(hand1);
+	var is3ofAKind2 = is3ofAKind(hand2);
+	
+	var isStraight1 = isStraight(hand1);
+	var isStraight2 = isStraight(hand2);
+
+	var isFlush1 = isFlush(strHand1);
+	var isFlush2 = isFlush(strHand2);
+
+	var isFullHouse1 = isFullHouse(hand1);
+	var isFullHouse2 = isFullHouse(hand2);
+
+	var is4ofAKind1 = is4ofAKind(hand1);
+	var is4ofAKind2 = is4ofAKind(hand2);
+
+	var isStraightFlush1 = false;
+	var isStraightFlush2 = false;
+
+	if(isFlush1 && isStraight1 >= 0){
+		isStraightFlush1 = true;
+	}
+
+	if(isFlush2 && isStraight2 >= 0){
+		isStraightFlush2 = true;
+	}
+
+	var isRoyalFlush1 = false;
+	var isRoyalFlush2 = false;
+	
+	if(isStraightFlush1 && highCard1 == 12){
+		isRoyalFlush1 = true;
+	}
+
+	if(isStraightFlush2 && highCard2 == 12){
+		isRoyalFlush2 = true;
+	}
+
+document.getElementById("results").innerHTML += '<tr><td></td><td>' + hand1 + '</td><td>' + hand2 + '</td><td></td></tr>';
+	
+// Determine if player1 won	
+// Royal Flush
+	if(isRoyalFlush1) {
+		if(isRoyalFlush2){
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+// Straight Flush
+	if(isStraightFlush1) {
+		if(isStraightFlush2){
+			if(hand1[0] > hand2[0]){
+				return 1;
+			} else {
+				return 0;
+			}
+		} else {
+			return 1;
+		}
+	}
+// 4 of a Kind
+	if(is4ofAKind1 > is4ofAKind2) {
+		return 1;
+	} else if(is4ofAKind1 < is4ofAKind2) {
+		return 0;
+	}
+// Full House
+	if(isFullHouse1 > isFullHouse2) {
+		return 1;
+	} else if(isFullHouse1 < isFullHouse2) {
+		return 0;
+	}
+// Flush
+	if(isFlush1){
+		if(isFlush2) {
+			if(hand1[0] > hand2[0]) {
+				return 1;
+			} else if(hand1[0] < hand2[0]) {
+				return 0;
+			} else if(hand1[1] > hand2[1]) {
+				return 1;
+			} else if(hand1[1] < hand2[1]) {
+				return 0;
+			} else if(hand1[2] > hand2[2]) {
+				return 1;
+			} else if(hand1[2] < hand2[2]) {
+				return 0;
+			} else if(hand1[3] > hand2[3]) {
+				return 1;
+			} else if(hand1[3] < hand2[3]) {
+				return 0;
+			} else if(hand1[4] > hand2[4]) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else {
+			return 1;
+		}
+	}
+// Straight
+	if(isStraight1 > isStraight2) {
+		return 1;
+	} else if(isStraight1 < isStraight2){
+		return 0;
+	} else if(isStraight1 != -1 && isStraight1 == isStraight2){
+		return 0;
+	}
+// 3 of a Kind
+	if(is3ofAKind1 > is3ofAKind2){
+		return 1;
+	} else if(is3ofAKind1 < is3ofAKind2){
+		return 0;
+	}
+// 2 Pair
+	if(is2Pair1[0] >  -1) {
+		if(is2Pair1[0] > is2Pair2[0]){	// Highest pair
+			return 1;
+		} else if(is2Pair1[0] < is2Pair2[0]){
+			return 0;
+		} else if(is2Pair1[1] > is2Pair2[1]){	// Lowest pair
+			return 1;
+		} else if(is2Pair1[1] < is2Pair2[1]){
+			return 0;
+		} else if(is2Pair1[2] > is2Pair2[2]){	// Spare Card
+			return 1;
+		} else if (is2Pair1[2] <= is2Pair2[2]){
+			return 0;
+		}
+	} else if(is2Pair2[0] > -1) {
+		return 0;
+	}
+// Pair
+	if(isPair1[0] >  -1) {
+		if(isPair1[0] > isPair2[0]){
+			return 1;
+		} else if(isPair1[0] < isPair2[0]){
+			return 0;
+		} else if(isPair1[1] > isPair2[1]) {
+			return 1;
+		} else if(isPair1[1] < isPair2[1]) {
+			return 0;
+		} else if(isPair1[2] > isPair2[2]) {
+			return 1;
+		} else if(isPair1[2] < isPair2[2]) {
+			return 0;
+		} else if(isPair1[3] > isPair2[3]) {
+			return 1;
+		} else if(isPair1[3] <= isPair2[3]) {
+			return 0;
+		}
+	} else if(isPair2[0] > -1) {
+		return 0;
+	}
+// High Card
+	if(hand1[0] > hand2[0]) {
+		return 1;
+	} else if(hand1[0] < hand2[0]){
+		return 0;
+	} else if(hand1[1] > hand2[1]) {
+		return 1;
+	} else if(hand1[1] < hand2[1]) {
+		return 0;
+	} else if(hand1[2] > hand2[2]) {
+		return 1;
+	} else if(hand1[2] < hand2[2]) {
+		return 0;
+	} else if(hand1[3] > hand2[3]) {
+		return 1;
+	} else if(hand1[3] < hand2[3]) {
+		return 0;
+	} else if(hand1[4] > hand2[4]) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+function is4ofAKind(hand){
+	if(hand[0] == hand[1]
+		&& hand[0] == hand[2]
+		&& hand[0] == hand[3]){
+		return hand[0];
+	}
+	if(hand[1] == hand[2]
+		&& hand[1] == hand[3]
+		&& hand[1] == hand[4]){
+		return hand[1];
+	}
+	return -1;
+}
+
+function isFullHouse(hand){
+  if(hand[0] == hand[1]
+  	 && hand[0] == hand[2]
+  	 && hand[3] == hand[4]
+  	){
+  	return hand[0];
+  }
+  if(hand[0] == hand[1]
+  	 && hand[2] == hand[3]
+  	 && hand[2] == hand[4]
+  	){
+  	return hand[2];
+  }
+  return -1;
+}
+
+function isFlush(hand){
+	if(hand[0].substring(1,2) == hand[1].substring(1,2)
+		&& hand[0].substring(1,2) == hand[2].substring(1,2)
+		&& hand[0].substring(1,2) == hand[3].substring(1,2)
+		&& hand[0].substring(1,2) == hand[4].substring(1,2)
+		){
+		return true;
+	}
+  return false;
+}
+
+function isStraight(hand){
+	if(hand[0] == hand[1] + 1
+		&& hand[0] == hand[2] + 2
+		&& hand[0] == hand[3] + 3
+		&& hand[0] == hand[4] + 4
+		){
+		return hand[0];
+	}
+  return -1;
+}
+
+function is3ofAKind(hand){
+  if(hand[0] == hand[1]
+  	 && hand[1] == hand[2]
+  	){
+  	return hand[0];
+  }
+  if(hand[1] == hand[2]
+  	 && hand[2] == hand[3]
+  	){
+  	return hand[1];
+  }
+  if(hand[2] == hand[3]
+  	 && hand[3] == hand[4]
+  	){
+  	return hand[2];
+  }
+  return -1;
+}
+
+function is2Pair(hand){
+  if(hand[0] == hand[1]
+  	 && hand[2] == hand[3]
+  	){
+  	return [hand[0], hand[2], hand[4]];
+  }
+  if(hand[1] == hand[2]
+  	 && hand[3] == hand[4]
+  	){
+  	return [hand[1], hand[3], hand[0]];
+  }
+  if(hand[0] == hand[1]
+  	 && hand[3] == hand[4]
+  	){
+  	return [hand[0], hand[3], hand[2]];
+  }
+  return [-1,-1,-1];
+}
+
+function isPair(hand){
+  if(hand[0] == hand[1]){
+  	return [hand[0],hand[2],hand[3],hand[4]];
+  }
+ 	if(hand[1] == hand[2]){
+  	return [hand[1],hand[0],hand[3],hand[4]];
+  }
+	if(hand[2] == hand[3]){
+  	return [hand[2],hand[0],hand[1],hand[4]];
+  }
+	if(hand[3] == hand[4]){
+  	return [hand[3],hand[0],hand[1],hand[2]];
+  }
+  return [-1,-1,-1,-1];
+}
+</script>
+</html>
