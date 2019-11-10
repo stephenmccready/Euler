@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Problem 89</title>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1"><style>
+table {border-collapse: collapse;}
+th,td {border:1px solid powderblue;padding:5px;}
+</style>
+</head>
+<body>
+<table><tbody id="results"></tbody></table>
+</body>
+<script>
+/*
+I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000
+
+Numerals must be arranged in descending order of size.
+M, C, and X cannot be equalled or exceeded by smaller denominations.
+D, L, and V can each only appear once.
+
+Only one I, X, and C can be used as the leading numeral in part of a subtractive pair.
+I can only be placed before V and X.
+X can only be placed before L and C.
+C can only be placed before D and M.
+*/
+var allText="";
+function readTextFile(file)
+{
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                allText=rawFile.responseText;                
+            }
+        }
+    }
+    rawFile.send(null);
+}
+
+readTextFile('roman.txt');
+
+var inputRomanNumber = allText.split('\n');
+var totalDiff = 0;
+
+for (x = 0; x < inputRomanNumber.length-1; x++){
+	var arabicNumber = convertRomanToNumber(inputRomanNumber[x]);
+	var outputRomanNumber = convertArabicNumberToRoman(arabicNumber);
+	var diff = inputRomanNumber[x].length - outputRomanNumber.length;
+	totalDiff += diff;
+
+	document.getElementById("results").innerHTML += '<tr><td>' + x + '.</td><td>' + inputRomanNumber[x] + '</td><td>' + (inputRomanNumber[x].length - 1) + '</td><td>' 
+		+ arabicNumber + '</td><td>'+ outputRomanNumber + '</td><td>' + outputRomanNumber.length + '</td><td>' + diff + '</td></tr>';
+}
+
+console.log(totalDiff);
+
+function convertRomanToNumber(romanNumber){
+	var romanNum = romanNumber.split("");
+	var arabicNumber = 0;
+	for (y = 0; y < romanNum.length; y++){	
+		switch (romanNum[y]){
+			case "M":	arabicNumber += 1000;	break;
+			case "D":	arabicNumber += 500;	break;
+			case "C":	
+				if(romanNum[y+1] == "D"){
+					arabicNumber += 400;
+					y++;
+				} else {
+					if(romanNum[y+1] == "M"){
+						arabicNumber += 900;
+						y++;
+					} else {
+						arabicNumber += 100;
+					}
+				}			
+			break;
+			case "L":	arabicNumber += 50;		break;
+			case "X":	
+				if(romanNum[y+1] == "C"){
+					arabicNumber += 90;
+					y++;
+				} else {
+					if(romanNum[y+1] == "L"){
+						arabicNumber += 40;
+						y++;
+					} else {
+						arabicNumber += 10;
+					}
+				}			
+			break;
+			case "V":	
+				arabicNumber += 5;		
+			break;
+			case "I":	
+				if(y == romanNum.length){
+					arabicNumber += 1;
+				} else {
+					if(romanNum[y+1] == "V"){
+						arabicNumber += 4;
+						y++;
+					} else if(romanNum[y+1] == "X"){
+						arabicNumber += 9;
+						y++;
+					} else {
+						arabicNumber += 1;
+					}	
+				}			
+			break;		
+		}
+	}
+	return arabicNumber;
+}
+
+function convertArabicNumberToRoman(arabicNumber){
+	var romanNumber = '';
+	while (arabicNumber > 0) {
+		if(arabicNumber > 999) {
+			romanNumber += 'M';
+			arabicNumber -= 1000;
+		} else if(arabicNumber > 899) {
+			romanNumber += 'CM';
+			arabicNumber -= 900;
+		} else if(arabicNumber > 499) {
+			romanNumber += 'D';
+			arabicNumber -= 500;
+		} else if(arabicNumber > 399) {
+			romanNumber += 'CD';
+			arabicNumber -= 400;
+		} else if(arabicNumber > 99) {
+			romanNumber += 'C';
+			arabicNumber -= 100;
+		} else if(arabicNumber > 89) {
+			romanNumber += 'XC';
+			arabicNumber -= 90;
+		} else if(arabicNumber > 49) {
+			romanNumber += 'L';
+			arabicNumber -= 50; 
+		} else if(arabicNumber > 39) {
+			romanNumber += 'XL';
+			arabicNumber -= 40;
+		} else if(arabicNumber > 9) {
+			romanNumber += 'X';
+			arabicNumber -= 10;
+		} else if(arabicNumber == 9) {
+			romanNumber += 'IX';
+			arabicNumber -= 9;
+		} else if(arabicNumber > 4) {
+			romanNumber += 'V';
+			arabicNumber -= 5;
+		} else if(arabicNumber == 4) {
+			romanNumber += 'IV';
+			arabicNumber -= 4;
+		} else {
+			romanNumber += 'I';
+			arabicNumber -= 1;
+		}
+	}
+	return romanNumber;	
+}
+</script>
+</html>
