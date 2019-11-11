@@ -28,7 +28,7 @@ How many reversible numbers are there below one-billion (10^9)?
 */
 var reversibles = 0;
 
-for(num = 11; num < 1000000000; num++) {
+for(num = 11; num < 10**9; num++) {
 	var strNum = num.toString();
 
 	if(	(strNum[0] % 2) == (strNum[strNum.length - 1] % 2) 
