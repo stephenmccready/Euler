@@ -11,7 +11,7 @@ for(num=1; primeCount<10001; num++){
   }
 }
 
-document.getElementById('results').innerHTML = primeCount + "st prime is " + (num - 1);
+console.log(primeCount + "st prime is " + (num - 1));
 
 function isPrime(y) {
   for(var i = 2; i < y; i++){
